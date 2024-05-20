@@ -18,7 +18,7 @@
 def main():
     age = int(input("Введите ваш возраст: "))
     def decide(age):
-        occupation_list = ["в детский сад", "в школу", "идти в ВУЗ", "работать"]
+        occupation_list = ["в детский сад", "в школу", "в ВУЗ", "работать"]
         if 0 < age <= 6:
             return occupation_list[0]
         elif 6 < age < 18:
