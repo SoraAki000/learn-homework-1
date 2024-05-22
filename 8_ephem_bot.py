@@ -13,21 +13,24 @@
 
 """
 import logging
+import config
+import ephem
+from datetime import datetime
 
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 
 logging.basicConfig(format='%(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO,
                     filename='bot.log')
-
-
-PROXY = {
-    'proxy_url': 'socks5://t1.learn.python.ru:1080',
-    'urllib3_proxy_kwargs': {
-        'username': 'learn',
-        'password': 'python'
-    }
-}
+bodies_list, bodies_classes = [], []
+for planet in ephem.Planet.__subclasses__():
+    if planet().name is not None and planet().name not in bodies_list:
+        bodies_list.append(planet().name)
+        bodies_classes.append(planet)
+for moon in ephem.PlanetMoon.__subclasses__():
+    if moon().name is not None and moon().name not in bodies_list:
+        bodies_list.append(moon().name)
+        bodies_classes.append(moon)
 
 
 def greet_user(update, context):
@@ -36,21 +39,35 @@ def greet_user(update, context):
     update.message.reply_text(text)
 
 
+def planets(update, context):
+    said_planet = update.message.text.split()[1].capitalize()
+    dt = datetime.now().strftime('%Y/%m/%d')
+    found_body = said_planet in bodies_list
+    if found_body:
+        i = bodies_list.index(said_planet)
+        constellation = ephem.constellation(bodies_classes[i](dt))
+        update.message.reply_text(constellation[1])
+    else:
+        update.message.reply_text("Unknown planet.")
+
+
 def talk_to_me(update, context):
     user_text = update.message.text
     print(user_text)
-    update.message.reply_text(text)
+    update.message.reply_text(user_text)
 
 
 def main():
-    mybot = Updater("КЛЮЧ, КОТОРЫЙ НАМ ВЫДАЛ BotFather", request_kwargs=PROXY, use_context=True)
+    mybot = Updater(config.api_key, use_context=True)
 
     dp = mybot.dispatcher
     dp.add_handler(CommandHandler("start", greet_user))
+    dp.add_handler(CommandHandler("planet", planets))
     dp.add_handler(MessageHandler(Filters.text, talk_to_me))
 
     mybot.start_polling()
     mybot.idle()
+    logging.info("Бот запущен.")
 
 
 if __name__ == "__main__":
