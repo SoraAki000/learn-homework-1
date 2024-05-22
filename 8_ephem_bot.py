@@ -27,10 +27,6 @@ for planet in ephem.Planet.__subclasses__():
     if planet().name is not None and planet().name not in bodies_list:
         bodies_list.append(planet().name)
         bodies_classes.append(planet)
-for moon in ephem.PlanetMoon.__subclasses__():
-    if moon().name is not None and moon().name not in bodies_list:
-        bodies_list.append(moon().name)
-        bodies_classes.append(moon)
 
 
 def greet_user(update, context):
@@ -42,13 +38,16 @@ def greet_user(update, context):
 def planets(update, context):
     said_planet = update.message.text.split()[1].capitalize()
     dt = datetime.now().strftime('%Y/%m/%d')
-    found_body = said_planet in bodies_list
-    if found_body:
-        i = bodies_list.index(said_planet)
-        constellation = ephem.constellation(bodies_classes[i](dt))
-        update.message.reply_text(constellation[1])
+    if said_planet == "List":
+        update.message.reply_text(', '.join(bodies_list))
     else:
-        update.message.reply_text("Unknown planet.")
+        found_body = said_planet in bodies_list
+        if found_body:
+            i = bodies_list.index(said_planet)
+            constellation = ephem.constellation(bodies_classes[i](dt))
+            update.message.reply_text(constellation[1])
+        else:
+            update.message.reply_text("Unknown planet.")
 
 
 def talk_to_me(update, context):
