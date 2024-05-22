@@ -45,7 +45,7 @@ def planets(update, context):
         if found_body:
             i = bodies_list.index(said_planet)
             constellation = ephem.constellation(bodies_classes[i](dt))
-            update.message.reply_text(constellation[1])
+            update.message.reply_text(f"Constellation for {said_planet} on {dt} is {constellation[1]}")
         else:
             update.message.reply_text("Unknown planet.")
 
